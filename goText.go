@@ -36,6 +36,8 @@ func rw(target string, argu int) error {
 		}
 	case 2:
 		read(scanner, target)
+	case 3:
+		writeNew(target)
 	}
 
 	defer file.Close()
@@ -72,11 +74,14 @@ func newFile(file string) bool {
 	if exists(file) {
 		if confirmation("File exist, overwrite ", file) {
 			createFile(file)
+			return true
+		} else {
+			return false
 		}
 	} else {
 		createFile(file)
+		return true
 	}
-	return false
 }
 
 func write(file *bufio.Scanner, target string) {
@@ -96,6 +101,14 @@ func write(file *bufio.Scanner, target string) {
 	}
 }
 
+func writeNew(target string) {
+	f, err := os.OpenFile(target, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	isError(err)
+	defer f.Close()
+	if _, err := f.WriteString("text to append\n"); err != nil {
+		fmt.Println(err)
+	}
+}
 func read(text *bufio.Scanner, target string) {
 	for text.Scan() {
 		fmt.Println(text.Text())
@@ -144,11 +157,13 @@ func main() {
 
 	switch command[2] {
 	case "new":
-		if !(newFile(command[1])) {
+		if newFile(command[1]) {
 			fmt.Printf("%s has been created", command[1])
 		}
 	case "edit":
 		rw(command[1], 1)
+	case "write":
+		rw(command[1], 3)
 	case "read":
 		rw(command[1], 2)
 	case "delete":

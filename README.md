@@ -1,6 +1,6 @@
-# Foobar
+# goText
 
-Foobar is a Python library for dealing with word pluralization.
+Simple Command line base to create, edit, read, and delete text file
 
 ## Installation
 
