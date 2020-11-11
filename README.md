@@ -14,23 +14,11 @@ go build goText.go
 ```bash
 ./goText <file-name> <command>
 ```
-# Command
-```bash
-new
-```
-create new file
-```bash
-edit
-```
-Write or edit on file 
-```bash
-read
-``` 
-view file
-```bash
-delete
-``` 
-delete file
+### Command
+`new   ` - create new file
+`edit  ` - Write or edit on file 
+`read  ` - view file
+`delete` - delete file
 
 ## Todo
 - open file with command argument ( v )
@@ -39,7 +27,7 @@ delete file
 - save change (   )
 - create new file ( v )
 - delete file ( v )
-- reconstruction file structure (   )
+- restructure file ( v )
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

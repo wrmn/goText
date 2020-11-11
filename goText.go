@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/tcnksm/go-input"
@@ -42,48 +41,46 @@ func rw(target string, argu int) error {
 
 func newFile(file string) bool {
 	_, err := os.Create(file)
+
 	if isError(err) {
 		return false
 	}
+
 	return true
 }
 
-func write(file *bufio.Scanner, target string) error {
+func write(file *bufio.Scanner, target string) {
 	var idx []string
-
 	f, err := os.Create("." + target + ".temp")
-
 	i := 1
+
 	for file.Scan() {
 		fmt.Println("line ", i)
 		idx = append(idx, edit(file.Text()))
 		i++
 	}
+
 	for _, v := range idx {
 		fmt.Fprintln(f, v)
 		isError(err)
 	}
-
-	return nil
 }
 
-func read(text *bufio.Scanner, target string) error {
-
+func read(text *bufio.Scanner, target string) {
 	for text.Scan() {
 		fmt.Println(text.Text())
 	}
 
 	isError(text.Err())
-
-	return nil
-
 }
 
 func deleteFile(file string) bool {
 	err := os.Remove(file)
+
 	if isError(err) {
 		return false
 	}
+
 	return true
 }
 
@@ -102,28 +99,18 @@ func edit(line string) string {
 	return afterEdit
 }
 
-func Copy(src, dst string) error {
-	in, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return err
-	}
-	return out.Close()
+func invalid(inv string) {
+	help := ", use \n---------------\n1. new    - create new file\n2. edit  - write or edit on file\n3. read   - view file\n4. delete - delete file\n\n/.goText <file name> <command>"
+	fmt.Printf(inv + help)
 }
 
 func main() {
 	command := os.Args
+
+	if len(command) < 2 {
+		invalid("Need Argument")
+		return
+	}
 
 	switch command[2] {
 	case "new":
@@ -139,7 +126,6 @@ func main() {
 			fmt.Printf("%s has been deleted", command[1])
 		}
 	default:
-		fmt.Printf("Invalid command, use \n---------------\n1. new    - create new file\n2. edit  - write or edit on file\n3. read   - view file\n4. delete - delete file\n")
-
+		invalid("Incomplete command")
 	}
 }
