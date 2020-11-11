@@ -13,13 +13,13 @@ func isError(err error) bool {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	return (err != nil)
+	return (err == nil)
 }
 
 func rw(target string, argu int) error {
 	file, err := os.OpenFile(target, os.O_RDWR, 0644)
 
-	if isError(err) {
+	if !(isError(err)) {
 		return nil
 	} else {
 		fmt.Println("Opening ", target)
@@ -40,24 +40,30 @@ func rw(target string, argu int) error {
 	return nil
 }
 
-func newFile(file string) error {
-	return nil
+func newFile(file string) bool {
+	_, err := os.Create(file)
+	if isError(err) {
+		return false
+	}
+	return true
 }
 
 func write(file *bufio.Scanner, target string) error {
 	var idx []string
 
-	f, err := os.Create(target + ".temp")
+	f, err := os.Create("." + target + ".temp")
 
+	i := 1
 	for file.Scan() {
+		fmt.Println("line ", i)
 		idx = append(idx, edit(file.Text()))
+		i++
 	}
 	for _, v := range idx {
 		fmt.Fprintln(f, v)
-		if isError(err) {
-			return err
-		}
+		isError(err)
 	}
+
 	return nil
 }
 
@@ -67,16 +73,18 @@ func read(text *bufio.Scanner, target string) error {
 		fmt.Println(text.Text())
 	}
 
-	if isError(text.Err()) {
-		return nil
-	}
+	isError(text.Err())
 
 	return nil
 
 }
 
-func deleteFile(file string) error {
-	return nil
+func deleteFile(file string) bool {
+	err := os.Remove(file)
+	if isError(err) {
+		return false
+	}
+	return true
 }
 
 func edit(line string) string {
@@ -89,9 +97,7 @@ func edit(line string) string {
 		Default: ": " + line,
 	})
 
-	if isError(err) {
-		return ""
-	}
+	isError(err)
 
 	return afterEdit
 }
@@ -119,16 +125,21 @@ func Copy(src, dst string) error {
 func main() {
 	command := os.Args
 
-	switch command[1] {
+	switch command[2] {
 	case "new":
-		newFile(command[2])
-	case "write":
-		rw(command[2], 1)
+		if !(newFile(command[1])) {
+			fmt.Printf("%s has been created", command[1])
+		}
+	case "edit":
+		rw(command[1], 1)
 	case "read":
-		rw(command[2], 2)
+		rw(command[1], 2)
 	case "delete":
-		deleteFile(command[2])
+		if !(deleteFile(command[1])) {
+			fmt.Printf("%s has been deleted", command[1])
+		}
 	default:
-		fmt.Print("Invalid command")
+		fmt.Printf("Invalid command, use \n---------------\n1. new    - create new file\n2. edit  - write or edit on file\n3. read   - view file\n4. delete - delete file\n")
+
 	}
 }
