@@ -30,6 +30,10 @@ func rw(target string, argu int) error {
 	switch argu {
 	case 1:
 		write(scanner, target)
+		delFile, renFile := os.Remove(target), os.Rename("."+target+".temp", target)
+		if isError(renFile) && isError(delFile) {
+			fmt.Printf("%s has been writed", target)
+		}
 	case 2:
 		read(scanner, target)
 	}
@@ -39,14 +43,40 @@ func rw(target string, argu int) error {
 	return nil
 }
 
-func newFile(file string) bool {
-	_, err := os.Create(file)
-
-	if isError(err) {
-		return false
+func confirmation(msg, file string) bool {
+	var input string
+	fmt.Print(msg + file + " ? (y/N)")
+	fmt.Scanln(&input)
+	if input == "y" || input == "Y" {
+		return true
 	}
+	return false
+}
 
+func createFile(file string) {
+	_, err := os.Create(file)
+	isError(err)
+}
+
+func exists(file string) bool {
+	if _, err := os.Stat(file); err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
 	return true
+}
+
+func newFile(file string) bool {
+	fmt.Printf("%t", exists(file))
+	if exists(file) {
+		if confirmation("File exist, overwrite ", file) {
+			createFile(file)
+		}
+	} else {
+		createFile(file)
+	}
+	return false
 }
 
 func write(file *bufio.Scanner, target string) {
@@ -100,7 +130,7 @@ func edit(line string) string {
 }
 
 func invalid(inv string) {
-	help := ", use \n---------------\n1. new    - create new file\n2. edit  - write or edit on file\n3. read   - view file\n4. delete - delete file\n\n/.goText <file name> <command>"
+	help := "\n---------------\ncommand :\n1. new    - create new file\n2. edit   - write or edit on file\n3. read   - view file\n4. delete - delete file\n\n./goText <file name> <command>"
 	fmt.Printf(inv + help)
 }
 
@@ -108,7 +138,7 @@ func main() {
 	command := os.Args
 
 	if len(command) < 2 {
-		invalid("Need Argument")
+		invalid("\nNeed Argument")
 		return
 	}
 
@@ -122,10 +152,12 @@ func main() {
 	case "read":
 		rw(command[1], 2)
 	case "delete":
-		if !(deleteFile(command[1])) {
-			fmt.Printf("%s has been deleted", command[1])
+		if confirmation("Delete ", command[1]) {
+			if !(deleteFile(command[1])) {
+				fmt.Printf("%s has been deleted", command[1])
+			}
 		}
 	default:
-		invalid("Incomplete command")
+		invalid("\nUnknown command :" + command[2])
 	}
 }

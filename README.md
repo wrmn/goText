@@ -24,7 +24,7 @@ go build goText.go
 - open file with command argument ( v )
 - show current file format ( x )
 - edit text ( ? ) => can't add new line
-- save change (   )
+- save change ( v )
 - create new file ( v )
 - delete file ( v )
 - restructure file ( v )
