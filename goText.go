@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/tcnksm/go-input"
@@ -32,7 +33,7 @@ func rw(target string, argu int) error {
 		write(scanner, target)
 		delFile, renFile := os.Remove(target), os.Rename("."+target+".temp", target)
 		if isError(renFile) && isError(delFile) {
-			fmt.Printf("%s has been writed", target)
+			fmt.Printf("%s has been writed\n", target)
 		}
 	case 2:
 		read(scanner, target)
@@ -58,6 +59,10 @@ func confirmation(msg, file string) bool {
 func createFile(file string) {
 	_, err := os.Create(file)
 	isError(err)
+
+	errC := ioutil.WriteFile(file, []byte(" "), 0644)
+	isError(errC)
+
 }
 
 func exists(file string) bool {
@@ -70,7 +75,6 @@ func exists(file string) bool {
 }
 
 func newFile(file string) bool {
-	fmt.Printf("%t", exists(file))
 	if exists(file) {
 		if confirmation("File exist, overwrite ", file) {
 			createFile(file)
@@ -95,8 +99,12 @@ func write(file *bufio.Scanner, target string) {
 		i++
 	}
 
-	for _, v := range idx {
-		fmt.Fprintln(f, v)
+	for i, v := range idx {
+		if i != len(idx) {
+			fmt.Fprintln(f, v)
+		} else {
+			fmt.Fprint(f, v)
+		}
 		isError(err)
 	}
 }
@@ -105,10 +113,21 @@ func writeNew(target string) {
 	f, err := os.OpenFile(target, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	isError(err)
 	defer f.Close()
-	if _, err := f.WriteString("text to append\n"); err != nil {
-		fmt.Println(err)
+	ui := &input.UI{
+		Writer: os.Stdout,
+		Reader: os.Stdin,
 	}
+
+	afterEdit, err := ui.Ask("new line", &input.Options{})
+
+	isError(err)
+
+	_, ers := f.Write([]byte("\n" + afterEdit))
+
+	isError(ers)
+
 }
+
 func read(text *bufio.Scanner, target string) {
 	for text.Scan() {
 		fmt.Println(text.Text())
@@ -143,7 +162,7 @@ func edit(line string) string {
 }
 
 func invalid(inv string) {
-	help := "\n---------------\ncommand :\n1. new    - create new file\n2. edit   - write or edit on file\n3. read   - view file\n4. delete - delete file\n\n./goText <file name> <command>"
+	help := "\n---------------\ncommand :\n1. new    - create new file\n2. edit   - write or edit on file\n3. write  - write new line on file\n4. read   - view file\n5. delete - delete file\n\n./goText <file name> <command>"
 	fmt.Printf(inv + help)
 }
 
@@ -158,7 +177,7 @@ func main() {
 	switch command[2] {
 	case "new":
 		if newFile(command[1]) {
-			fmt.Printf("%s has been created", command[1])
+			fmt.Printf("%s has been created\n", command[1])
 		}
 	case "edit":
 		rw(command[1], 1)
@@ -167,10 +186,14 @@ func main() {
 	case "read":
 		rw(command[1], 2)
 	case "delete":
-		if confirmation("Delete ", command[1]) {
-			if !(deleteFile(command[1])) {
-				fmt.Printf("%s has been deleted", command[1])
+		if exists(command[1]) {
+			if confirmation("Delete ", command[1]) {
+				if !(deleteFile(command[1])) {
+					fmt.Printf("%s has been deleted\n", command[1])
+				}
 			}
+		} else {
+			fmt.Printf("%s not found\n", command[1])
 		}
 	default:
 		invalid("\nUnknown command :" + command[2])

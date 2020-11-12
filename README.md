@@ -15,19 +15,23 @@ go build goText.go
 ./goText <file-name> <command>
 ```
 ### Command
-`new   ` - create new file
-`edit  ` - Write or edit on file 
-`read  ` - view file
-`delete` - delete file
+- `new   ` - create new file
+
+- `edit  ` - Write or edit on file existing line
+
+- `write ` - Write a new line on file
+
+- `read  ` - view file
+
+- `delete` - delete file
 
 ## Todo
-- open file with command argument ( v )
-- show current file format ( x )
-- edit text ( ? ) => can't add new line
-- save change ( v )
+- read file( v )
+- edit all line text ( v ) 
+- edit text based on line (   )
+- write text new line ( v )
 - create new file ( v )
 - delete file ( v )
-- restructure file ( v )
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
